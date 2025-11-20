@@ -2,14 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\EquipService;
+use App\Http\Requests\StoreEquipRequest;
+use App\Http\Requests\UpdateEquipRequest;
 
 class EquipController extends Controller
 {
+    protected $service;
+
+    public function __construct(EquipService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index()
     {
-        $equips = $this->getEquips();
-
+        $equips = $this->service->listAll();
         return view('equips.index', compact('equips'));
     }
 
@@ -18,59 +26,39 @@ class EquipController extends Controller
         return view('equips.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreEquipRequest $request)
     {
-        $validated = $request->validate([
-            'nom'   => 'required|min:3',
-            'ciutat'=> 'required|min:2',
-            'lliga' => 'required|min:3',
-        ]);
+        $data = $request->validated();
 
-        $equips = $this->getEquips();
-        $equips[] = $validated;
-
-        session(['equips' => $equips]);
-
-        return redirect()
-            ->route('equips.index')
-            ->with('success', 'Equip creat correctament.');
-    }
-
-    public function show(int $index)
-    {
-        $equips = $this->getEquips();
-
-        abort_if(!isset($equips[$index]), 404);
-
-        $equip = $equips[$index];
-
-        return view('equips.show', compact('equip', 'index'));
-    }
-
-    protected function getEquips(): array
-    {
-        if (!session()->has('equips')) {
-            $seed = [
-                [
-                    'nom'    => 'Barça Femení',
-                    'ciutat' => 'Barcelona',
-                    'lliga'  => 'Lliga F',
-                ],
-                [
-                    'nom'    => 'Atlètic de Madrid Femení',
-                    'ciutat' => 'Madrid',
-                    'lliga'  => 'Lliga F',
-                ],
-                [
-                    'nom'    => 'Real Madrid Femení',
-                    'ciutat' => 'Madrid',
-                    'lliga'  => 'Lliga F',
-                ],
-            ];
-
-            session(['equips' => $seed]);
+        // guardem fitxer si hi ha escut
+        if ($request->hasFile('escut')) {
+            $data['escut'] = $request->file('escut')->store('escuts','public');
         }
 
-        return session('equips', []);
+        $this->service->store($data);
+
+        return redirect()->route('equips.index')->with('success', 'Equip creat.');
+    }
+
+    public function edit($id)
+    {
+        $equip = $this->service->find($id);
+        return view('equips.edit', compact('equip'));
+    }
+
+    public function update(UpdateEquipRequest $request, $id)
+    {
+        $data = $request->validated();
+        if ($request->hasFile('escut')) {
+            $data['escut'] = $request->file('escut')->store('escuts','public');
+        }
+        $this->service->update($id, $data);
+        return redirect()->route('equips.index')->with('success','Equip actualitzat.');
+    }
+
+    public function destroy($id)
+    {
+        $this->service->delete($id);
+        return redirect()->route('equips.index')->with('success','Equip eliminat.');
     }
 }

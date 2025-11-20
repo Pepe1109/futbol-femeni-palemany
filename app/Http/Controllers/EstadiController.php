@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estadi;
 use Illuminate\Http\Request;
+use App\Http\Requests\EstadiRequest; // si crees FormRequest
 
 class EstadiController extends Controller
 {
     public function index()
     {
-        $estadis = $this->getEstadisFromSession();
-
+        $estadis = Estadi::orderBy('nom')->paginate(15);
         return view('estadis.index', compact('estadis'));
     }
 
@@ -20,50 +21,45 @@ class EstadiController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nom'             => 'required|min:3',
-            'ciutat'          => 'required|min:2',
-            'capacitat'       => 'required|integer|min:0',
-            'equip_principal' => 'required|min:3',
+        $data = $request->validate([
+            'nom' => 'required|min:3',
+            'ciutat' => 'required|min:2',
+            'capacitat' => 'required|integer|min:0',
+            'equip_principal' => 'nullable|min:3'
         ]);
 
-        $estadis = $this->getEstadisFromSession();
-        $estadis[] = $validated;
+        Estadi::create($data);
 
-        session(['estadis' => $estadis]);
-
-        return redirect()
-            ->route('estadis.index')
-            ->with('success', 'Estadi creat correctament.');
+        return redirect()->route('estadis.index')->with('success', 'Estadi creat correctament.');
     }
 
-    protected function getEstadisFromSession(): array
+    public function show(Estadi $estadi)
     {
-        if (!session()->has('estadis')) {
-            $seed = [
-                [
-                    'nom'             => 'Estadi Johan Cruyff',
-                    'ciutat'          => 'Sant Joan Despí',
-                    'capacitat'       => 6000,
-                    'equip_principal' => 'FC Barcelona Femení',
-                ],
-                [
-                    'nom'             => 'Centro Deportivo Wanda Alcalá de Henares',
-                    'ciutat'          => 'Alcalá de Henares',
-                    'capacitat'       => 2800,
-                    'equip_principal' => 'Atlètic de Madrid Femení',
-                ],
-                [
-                    'nom'             => 'Estadio Alfredo Di Stéfano',
-                    'ciutat'          => 'Madrid',
-                    'capacitat'       => 6000,
-                    'equip_principal' => 'Real Madrid Femení',
-                ],
-            ];
+        return view('estadis.show', compact('estadi'));
+    }
 
-            session(['estadis' => $seed]);
-        }
+    public function edit(Estadi $estadi)
+    {
+        return view('estadis.edit', compact('estadi'));
+    }
 
-        return session('estadis', []);
+    public function update(Request $request, Estadi $estadi)
+    {
+        $data = $request->validate([
+            'nom' => 'required|min:3',
+            'ciutat' => 'required|min:2',
+            'capacitat' => 'required|integer|min:0',
+            'equip_principal' => 'nullable|min:3'
+        ]);
+
+        $estadi->update($data);
+
+        return redirect()->route('estadis.index')->with('success', 'Estadi actualitzat.');
+    }
+
+    public function destroy(Estadi $estadi)
+    {
+        $estadi->delete();
+        return redirect()->route('estadis.index')->with('success', 'Estadi eliminat.');
     }
 }
