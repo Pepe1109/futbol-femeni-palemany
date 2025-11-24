@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Equip;
 
-class EloquentEquipRepository implements BaseRepository
+class EquipRepository implements BaseRepository
 {
     protected $model;
 

@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\BaseRepository;
+use App\Repositories\EquipRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Cap binding extra; Laravel ja té tots els bindings necessaris
+        $this->app->bind(BaseRepository::class,  EquipRepository::class);
     }
 
     /**
@@ -19,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Cap codi extra necessari per ara
+        // Nada extra necesario por ahora
     }
 }
