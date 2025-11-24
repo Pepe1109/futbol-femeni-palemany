@@ -1,32 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-    <h2>Partits</h2>
+<h1>Llista de Partits</h1>
 
-    <a href="{{ route('partits.create') }}" class="btn btn-primary">+ Nou partit</a>
+@if(session('error'))
+    <div style="color:red">{{ session('error') }}</div>
+@endif
 
-    <table class="table">
-        <thead>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Local</th>
+        <th>Visitant</th>
+        <th>Data</th>
+        <th>Accions</th>
+    </tr>
+    @foreach($partits as $partit)
         <tr>
-            <th>Local</th>
-            <th>Visitant</th>
-            <th>Data</th>
-            <th>Resultat</th>
+            <td>{{ $partit->id }}</td>
+            <td>{{ $partit->local?->nom ?? '—' }}</td>
+            <td>{{ $partit->visitant?->nom ?? '—' }}</td>
+            <td>{{ $partit->data }}</td>
+            <td>
+                <a href="{{ route('partits.show', $partit->id) }}">Veure</a> |
+                <a href="{{ route('partits.edit', $partit->id) }}">Editar</a>
+            </td>
         </tr>
-        </thead>
-        <tbody>
-        @forelse ($partits as $partit)
-            <tr>
-                <td><x-equip-mini :nom="$partit['local'] ?? '-'" /></td>
-                <td><x-equip-mini :nom="$partit['visitant'] ?? '-'" /></td>
-                <td>{{ $partit['data'] ?? '-' }}</td>
-                <td>{{ $partit['resultat'] ?? '-' }}</td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="4">No hi ha partits.</td>
-            </tr>
-        @endforelse
-        </tbody>
-    </table>
+    @endforeach
+</table>
 @endsection

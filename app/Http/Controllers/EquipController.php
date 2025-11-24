@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Services\EquipService;
 use App\Http\Requests\StoreEquipRequest;
 use App\Http\Requests\UpdateEquipRequest;
+use App\Models\Equip;
+
 
 class EquipController extends Controller
 {
@@ -61,4 +63,12 @@ class EquipController extends Controller
         $this->service->delete($id);
         return redirect()->route('equips.index')->with('success','Equip eliminat.');
     }
+
+    public function show($id)
+    {
+        $equip = Equip::findOrFail($id);
+
+        return view('equips.show', compact('equip'));
+    }
+
 }

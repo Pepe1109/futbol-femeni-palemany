@@ -12,14 +12,23 @@
             <th>Ciutat</th>
             <th>Capacitat</th>
             <th>Equip principal</th>
+            <th>Accions</th>
         </tr>
         </thead>
         <tbody>
         @forelse ($estadis as $estadi)
-            <x-estadi :estadi="$estadi" />
+            <tr>
+                <td>{{ $estadi->nom }}</td>
+                <td>{{ $estadi->ciutat }}</td>
+                <td>{{ $estadi->capacitat }}</td>
+                <td>{{ $estadi->equip->nom ?? '-' }}</td>
+                <td>
+                    <a href="{{ route('estadis.show', $estadi->id) }}" class="btn btn-info btn-sm">Veure</a>
+                </td>
+            </tr>
         @empty
             <tr>
-                <td colspan="4">No hi ha estadis.</td>
+                <td colspan="5">No hi ha estadis.</td>
             </tr>
         @endforelse
         </tbody>

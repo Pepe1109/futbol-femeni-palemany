@@ -3,67 +3,63 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Partit;
+use App\Models\Equip;
 
 class PartitController extends Controller
 {
-
+    // Mostrar todos los partidos
     public function index()
     {
-        $partits = $this->getPartitsFromSession();
-
+        $partits = Partit::with(['local', 'visitant'])->get();
         return view('partits.index', compact('partits'));
     }
 
-    public function create()
+    // Mostrar un partido
+    public function show($id)
     {
-        return view('partits.create');
-    }
+        $partit = Partit::with(['local', 'visitant'])->find($id);
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate(
-            [
-                'local'    => 'required|min:2',
-                'visitant' => 'required|min:2|different:local',
-                'data'     => 'required|date_format:Y-m-d',
-                'resultat' => ['nullable', 'regex:/^\d+-\d+$/'],
-            ],
-            [
-                'resultat.regex' => 'El resultat ha de ser del tipus "X-Y" (per ex. 2-1).',
-            ]
-        );
-
-        $partits = $this->getPartitsFromSession();
-        $partits[] = $validated;
-
-        session(['partits' => $partits]);
-
-        return redirect()
-            ->route('partits.index')
-            ->with('success', 'Partit creat correctament.');
-    }
-
-    protected function getPartitsFromSession(): array
-    {
-        if (!session()->has('partits')) {
-            $seed = [
-                [
-                    'local'    => 'Barça Femení',
-                    'visitant' => 'Atlètic de Madrid',
-                    'data'     => '2024-11-30',
-                    'resultat' => null,
-                ],
-                [
-                    'local'    => 'Real Madrid Femení',
-                    'visitant' => 'Barça Femení',
-                    'data'     => '2024-12-15',
-                    'resultat' => '0-3',
-                ],
-            ];
-
-            session(['partits' => $seed]);
+        if (!$partit) {
+            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
         }
 
-        return session('partits', []);
+        return view('partits.show', compact('partit'));
+    }
+
+    // Formulario para editar
+    public function edit($id)
+    {
+        $partit = Partit::find($id);
+
+        if (!$partit) {
+            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
+        }
+
+        $equips = Equip::all();
+
+        return view('partits.edit', compact('partit', 'equips'));
+    }
+
+    // Guardar cambios
+    public function update(Request $request, $id)
+    {
+        $partit = Partit::find($id);
+
+        if (!$partit) {
+            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
+        }
+
+        $request->validate([
+            'local_id' => 'required|exists:equips,id',
+            'visitant_id' => 'required|exists:equips,id|different:local_id',
+            'data' => 'required|date',
+            'resultat' => 'nullable|string|max:20',
+        ]);
+
+        $partit->update($request->all());
+
+        return redirect()->route('partits.show', $partit->id)
+                         ->with('success', 'Partit actualitzat correctament.');
     }
 }

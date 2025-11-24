@@ -3,67 +3,72 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\JugadoraService;
+use App\Services\EquipService;
+use App\Services\GenereService;
 
 class JugadoraController extends Controller
 {
+    protected $jugadoraService;
+    protected $equipService;
+    protected $genereService;
 
+    public function __construct(
+        JugadoraService $jugadoraService,
+        EquipService $equipService,
+        GenereService $genereService
+    ) {
+        $this->jugadoraService = $jugadoraService;
+        $this->equipService = $equipService;
+        $this->genereService = $genereService;
+    }
+
+    // Listar todas las jugadoras
     public function index()
     {
-        $jugadores = $this->getJugadoresFromSession();
-
-        return view('jugadores.index', compact('jugadores'));
+        $jugadoras = $this->jugadoraService->getAll();
+        return view('jugadoras.index', compact('jugadoras'));
     }
 
-    public function create()
+    // Ver una jugadora
+    public function show($id)
     {
-        $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
+        $jugadora = $this->jugadoraService->find($id);
 
-        return view('jugadores.create', compact('posicions'));
-    }
-
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nom'   => 'required|min:3',
-            'equip' => 'required|min:2',
-            'posicio' => 'required|in:Portera,Defensa,Migcampista,Davantera',
-        ]);
-
-        $jugadores = $this->getJugadoresFromSession();
-        $jugadores[] = $validated;
-
-        session(['jugadores' => $jugadores]);
-
-        return redirect()
-            ->route('jugadores.index')
-            ->with('success', 'Jugadora creada correctament.');
-    }
-
-    protected function getJugadoresFromSession(): array
-    {
-        if (!session()->has('jugadores')) {
-            $seed = [
-                [
-                    'nom'    => 'Alexia Putellas',
-                    'equip'  => 'Barça Femení',
-                    'posicio'=> 'Migcampista',
-                ],
-                [
-                    'nom'    => 'Esther González',
-                    'equip'  => 'Atlètic de Madrid',
-                    'posicio'=> 'Davantera',
-                ],
-                [
-                    'nom'    => 'Misa Rodríguez',
-                    'equip'  => 'Real Madrid Femení',
-                    'posicio'=> 'Portera',
-                ],
-            ];
-
-            session(['jugadores' => $seed]);
+        if (!$jugadora) {
+            return redirect()->route('jugadoras.index')->with('error', 'Jugadora no encontrada');
         }
 
-        return session('jugadores', []);
+        return view('jugadoras.show', compact('jugadora'));
+    }
+
+    // Mostrar formulario para editar
+    public function edit($id)
+    {
+        $jugadora = $this->jugadoraService->find($id);
+        if (!$jugadora) {
+            return redirect()->route('jugadoras.index')->with('error', 'Jugadora no encontrada');
+        }
+
+        $equips = $this->equipService->getAll();
+        $generes = $this->genereService->getAll();
+
+        return view('jugadoras.edit', compact('jugadora', 'equips', 'generes'));
+    }
+
+    // Actualizar jugadora
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'edat' => 'required|integer|min:1',
+            'equip_id' => 'required|exists:equips,id',
+            'genere_id' => 'required|exists:generes,id',
+        ]);
+
+        $jugadora = $this->jugadoraService->update($id, $validated);
+
+        return redirect()->route('jugadoras.show', $jugadora->id)
+            ->with('success', 'Jugadora actualizada correctamente');
     }
 }
