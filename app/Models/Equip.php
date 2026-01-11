@@ -7,27 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Equip extends Model
 {
+    /** @use HasFactory<\Database\Factories\EquipFactory> */
     use HasFactory;
 
-    protected $fillable = ['nom', 'ciutat', 'lliga', 'escut'];
+    // Afegim 'escut' a la llista de camps permesos
+    protected $fillable = ['nom', 'estadi_id', 'titols', 'escut'];
 
-    public function estadis() {
-        // si voleu alta relació real useu relació específica; aquí per compatibilitat textual:
-        return $this->hasMany(Estadi::class, 'equip_principal', 'nom');
+    public function estadi()
+    {
+        return $this->belongsTo(Estadi::class);
     }
 
-    public function jugadores()
+    // Nova relació: Un equip té un manager
+    public function manager()
     {
-        return $this->hasMany(Jugadora::class);
-    }
-
-    public function partitsLocal()
-    {
-        return $this->hasMany(Partit::class, 'local_id');
-    }
-
-    public function partitsVisitant()
-    {
-        return $this->hasMany(Partit::class, 'visitant_id');
+        return $this->hasOne(User::class, 'team_id');
     }
 }

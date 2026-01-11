@@ -25,10 +25,12 @@ class JugadoraController extends Controller
 
     // Listar todas las jugadoras
     public function index()
-    {
-        $jugadoras = $this->jugadoraService->getAll();
-        return view('jugadoras.index', compact('jugadoras'));
-    }
+{
+    // Carreguem les jugadores amb el seu equip per evitar consultes extra (N+1)
+    $jugadores = \App\Models\Jugadora::with('equip')->paginate(10);
+    
+    return view('jugadores.index', compact('jugadores'));
+}
 
     // Ver una jugadora
     public function show($id)

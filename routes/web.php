@@ -5,46 +5,52 @@ use App\Http\Controllers\EquipController;
 use App\Http\Controllers\EstadiController;
 use App\Http\Controllers\JugadoraController;
 use App\Http\Controllers\PartitController;
+// Afegim el controlador de perfil que ve amb Breeze
+use App\Http\Controllers\ProfileController; 
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Redirecció inicial a equips
 Route::get('/', function () {
     return redirect()->route('equips.index');
 });
 
-// ---------- EQUIPS ----------
-Route::get('/equips', [EquipController::class, 'index'])->name('equips.index');
-Route::get('/equips/crear', [EquipController::class, 'create'])->name('equips.create');
-Route::post('/equips', [EquipController::class, 'store'])->name('equips.store');
-Route::get('/equips/{id}', [EquipController::class, 'show'])->name('equips.show');
-Route::get('/equips/{id}/editar', [EquipController::class, 'edit'])->name('equips.edit');
-Route::put('/equips/{id}', [EquipController::class, 'update'])->name('equips.update');
-Route::delete('/equips/{id}', [EquipController::class, 'destroy'])->name('equips.destroy');
+// Ruta Dashboard (protegida) - Ve amb Breeze
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
+// Rutes de Perfil d'Usuari (protegides) - Ve amb Breeze
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-// ---------- ESTADIS ----------
-Route::get('/estadis', [EstadiController::class, 'index'])->name('estadis.index');
-Route::get('/estadis/crear', [EstadiController::class, 'create'])->name('estadis.create');
-Route::post('/estadis', [EstadiController::class, 'store'])->name('estadis.store');
-Route::get('/estadis/{id}', [EstadiController::class, 'show'])->name('estadis.show');
-Route::get('/estadis/{id}/editar', [EstadiController::class, 'edit'])->name('estadis.edit');
-Route::put('/estadis/{id}', [EstadiController::class, 'update'])->name('estadis.update');
-Route::delete('/estadis/{id}', [EstadiController::class, 'destroy'])->name('estadis.destroy');
+// ---------- LES TEVES RUTES (EQUIPS, ESTADIS, ETC.) ----------
 
+// Grup de rutes públiques (o pots protegir-les amb ->middleware('auth') si vols)
+Route::middleware(['auth'])->group(function () {
+    
+    // Rutes per al component Livewire (Històric)
+    Route::get('/historic', [PartitController::class, 'historic'])->name('partits.historic');
 
-// ---------- JUGADORES ----------
-Route::get('/jugadores', [JugadoraController::class, 'index'])->name('jugadores.index');
-Route::get('/jugadores/crear', [JugadoraController::class, 'create'])->name('jugadores.create');
-Route::post('/jugadores', [JugadoraController::class, 'store'])->name('jugadores.store');
-Route::get('/jugadores/{id}', [JugadoraController::class, 'show'])->name('jugadores.show');
-Route::get('/jugadores/{id}/editar', [JugadoraController::class, 'edit'])->name('jugadores.edit');
-Route::put('/jugadores/{id}', [JugadoraController::class, 'update'])->name('jugadores.update');
-Route::delete('/jugadores/{id}', [JugadoraController::class, 'destroy'])->name('jugadores.destroy');
+    // EQUIPS
+    Route::resource('equips', EquipController::class);
+    
+    // ESTADIS
+    Route::resource('estadis', EstadiController::class);
+    
+    // JUGADORES
+    Route::resource('jugadores', JugadoraController::class);
+    
+    // PARTITS
+    Route::resource('partits', PartitController::class);
+});
 
-
-// ---------- PARTITS ----------
-Route::get('/partits', [PartitController::class, 'index'])->name('partits.index');
-Route::get('/partits/crear', [PartitController::class, 'create'])->name('partits.create');
-Route::post('/partits', [PartitController::class, 'store'])->name('partits.store');
-Route::get('/partits/{id}', [PartitController::class, 'show'])->name('partits.show');
-Route::get('/partits/{id}/editar', [PartitController::class, 'edit'])->name('partits.edit');
-Route::put('/partits/{id}', [PartitController::class, 'update'])->name('partits.update');
-Route::delete('/partits/{id}', [PartitController::class, 'destroy'])->name('partits.destroy');
+// Carreguem les rutes d'autenticació de Breeze (login, register, etc.)
+require __DIR__.'/auth.php';

@@ -7,7 +7,6 @@ use App\Http\Requests\StoreEquipRequest;
 use App\Http\Requests\UpdateEquipRequest;
 use App\Models\Equip;
 
-
 class EquipController extends Controller
 {
     protected $service;
@@ -30,16 +29,10 @@ class EquipController extends Controller
 
     public function store(StoreEquipRequest $request)
     {
-        $data = $request->validated();
+        // Passem totes les dades validades (inclòs el fitxer d'imatge si n'hi ha) al servei
+        $this->service->store($request->validated());
 
-        // guardem fitxer si hi ha escut
-        if ($request->hasFile('escut')) {
-            $data['escut'] = $request->file('escut')->store('escuts','public');
-        }
-
-        $this->service->store($data);
-
-        return redirect()->route('equips.index')->with('success', 'Equip creat.');
+        return redirect()->route('equips.index')->with('success', 'Equip creat correctament.');
     }
 
     public function edit($id)
@@ -50,25 +43,21 @@ class EquipController extends Controller
 
     public function update(UpdateEquipRequest $request, $id)
     {
-        $data = $request->validated();
-        if ($request->hasFile('escut')) {
-            $data['escut'] = $request->file('escut')->store('escuts','public');
-        }
-        $this->service->update($id, $data);
-        return redirect()->route('equips.index')->with('success','Equip actualitzat.');
+        // El servei s'encarrega de gestionar la pujada i substitució de la imatge
+        $this->service->update($id, $request->validated());
+        
+        return redirect()->route('equips.index')->with('success', 'Equip actualitzat correctament.');
     }
 
     public function destroy($id)
     {
         $this->service->delete($id);
-        return redirect()->route('equips.index')->with('success','Equip eliminat.');
+        return redirect()->route('equips.index')->with('success', 'Equip eliminat.');
     }
 
     public function show($id)
     {
         $equip = Equip::findOrFail($id);
-
         return view('equips.show', compact('equip'));
     }
-
 }
