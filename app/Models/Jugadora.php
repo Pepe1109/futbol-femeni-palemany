@@ -11,8 +11,9 @@ class Jugadora extends Model
 
     protected $table = 'jugadores';
 
+    // AFEGIT 'cognoms' que faltava i donava l'error SQL
     protected $fillable = [
-        'equip_id', 'nom', 'data_naixement', 'dorsal', 'posicio', 'foto'
+        'equip_id', 'nom', 'cognoms', 'data_naixement', 'dorsal', 'posicio', 'foto'
     ];
 
     public function equip()

@@ -2,27 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Models\Partit;
 use App\Models\Equip;
-use App\Models\Estadi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PartitFactory extends Factory
 {
-    protected $model = Partit::class;
-
-    public function definition()
+    public function definition(): array
     {
-        $local = Equip::factory();
-        $visitant = Equip::factory();
-
         return [
-            'local_id' => $local,
-            'visitant_id' => $visitant,
-            'estadi_id' => Estadi::factory(),
-            'data' => $this->faker->dateTimeBetween('now', '+1 year')->format('Y-m-d'),
-            'jornada' => $this->faker->numberBetween(1, 38),
-            'resultat' => null,
+            // Usamos los mismos nombres: local_id y visitant_id
+            'local_id' => Equip::factory(),
+            'visitant_id' => Equip::factory(),
+            'data' => $this->faker->dateTimeBetween('-1 month', '+1 month'),
+            'resultat' => $this->faker->optional()->randomElement(['1-0', '2-2', '0-3', '1-1']),
         ];
     }
 }
