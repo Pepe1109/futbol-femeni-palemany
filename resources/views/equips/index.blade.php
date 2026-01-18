@@ -10,7 +10,6 @@
                     ⚽ Llistat d'Equips
                 </h2>
                 
-                {{-- Solo el Admin ve el botón de crear (protegido por rol en la vista) --}}
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('equips.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
                     + Nou Equip
@@ -34,6 +33,11 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Estadi
                             </th>
+                            
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Forma
+                            </th>
+
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Títols
                             </th>
@@ -57,6 +61,27 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $equip->estadi->nom ?? 'Sense estadi' }}
                             </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex space-x-1">
+                                    @foreach($equip->forma as $res)
+                                        @if($res == 'G')
+                                            {{-- VICTORIA: VERDE FUERTE --}}
+                                            <span class="h-6 w-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold border border-green-700" title="Guanyat">G</span>
+                                        @elseif($res == 'E')
+                                            {{-- EMPATE: GRIS OSCURO / NEGRO --}}
+                                            <span class="h-6 w-6 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold border border-gray-900" title="Empat">E</span>
+                                        @else
+                                            {{-- DERROTA: ROJO FUERTE --}}
+                                            <span class="h-6 w-6 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold border border-red-700" title="Derrota">D</span>
+                                        @endif
+                                    @endforeach
+                                    @if(empty($equip->forma))
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @endif
+                                </div>
+                            </td>
+
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                     {{ $equip->titols }} 🏆
@@ -68,14 +93,12 @@
                                         👁️
                                     </a>
                                     
-                                    {{-- Botón Editar: Admin o Manager --}}
                                     @if(auth()->user()->role === 'admin' || auth()->user()->role === 'manager')
                                     <a href="{{ route('equips.edit', $equip->id) }}" class="text-yellow-600 hover:text-yellow-900" title="Editar">
                                         ✏️
                                     </a>
                                     @endif
 
-                                    {{-- Botón Borrar: Solo Admin --}}
                                     @if(auth()->user()->role === 'admin')
                                     <form action="{{ route('equips.destroy', $equip->id) }}" method="POST" class="inline" onsubmit="return confirm('Estàs segur de voler esborrar aquest equip?');">
                                         @csrf
@@ -90,7 +113,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                                 No hi ha equips registrats encara.
                             </td>
                         </tr>

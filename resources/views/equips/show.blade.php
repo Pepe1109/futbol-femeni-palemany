@@ -21,6 +21,27 @@
                         <p><strong>🏙️ Ciutat:</strong> {{ $equip->ciutat }}</p>
                         <p class="mt-2"><strong>🏟️ Estadi:</strong> {{ $equip->estadi->nom ?? 'Sense estadi assignat' }}</p>
                         <p class="mt-2"><strong>🏆 Títols:</strong> {{ $equip->titols }}</p>
+                        
+                        <div class="mt-6 border-t pt-4">
+                            <h4 class="font-bold text-gray-700 mb-2">Últims 5 Partits:</h4>
+                            <div class="flex space-x-2">
+                                @foreach($equip->forma as $res)
+                                    @if($res == 'G')
+                                        {{-- VICTORIA --}}
+                                        <div class="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold shadow-md border border-green-800">G</div>
+                                    @elseif($res == 'E')
+                                        {{-- EMPATE --}}
+                                        <div class="h-8 w-8 rounded-full bg-gray-800 text-white flex items-center justify-center font-bold shadow-md border border-black">E</div>
+                                    @else
+                                        {{-- DERROTA --}}
+                                        <div class="h-8 w-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold shadow-md border border-red-800">D</div>
+                                    @endif
+                                @endforeach
+                                @if(empty($equip->forma))
+                                    <p class="text-sm text-gray-400 italic">No hi ha partits registrats.</p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
 
                     <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
