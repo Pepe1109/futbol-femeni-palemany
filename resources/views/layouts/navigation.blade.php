@@ -32,6 +32,10 @@
                     <x-nav-link :href="route('partits.historic')" :active="request()->routeIs('partits.historic')">
                         {{ __('Històric') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('classificacio.index')" :active="request()->routeIs('classificacio.index')">
+                        {{ __('Classificació') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -102,6 +106,10 @@
 
             <x-responsive-nav-link :href="route('partits.historic')" :active="request()->routeIs('partits.historic')">
                 {{ __('Històric') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('classificacio.index')" :active="request()->routeIs('classificacio.index')">
+                {{ __('Classificació') }}
             </x-responsive-nav-link>
         </div>
 

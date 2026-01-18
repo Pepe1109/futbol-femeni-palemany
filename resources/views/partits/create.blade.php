@@ -3,82 +3,51 @@
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-            
-            <div class="p-6 bg-white border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">⚽ Tauler de Partits</h2>
-                
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('partits.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
-                    + Programar Partit
-                </a>
-                @endif
-            </div>
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">📅 Programar Nou Partit</h2>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Data</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Local</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Resultat</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visitant</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Accions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($partits as $partit)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($partit->data)->format('d/m/Y H:i') }}
-                            </td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap text-right font-bold text-gray-800">
-                                {{ $partit->local->nom }}
-                            </td>
+            @if ($errors->any())
+                <div class="mb-4 bg-red-100 text-red-700 p-4 rounded">
+                    <ul>@foreach ($errors->all() as $error) <li>• {{ $error }}</li> @endforeach</ul>
+                </div>
+            @endif
 
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                @if($partit->resultat)
-                                    <span class="px-3 py-1 bg-gray-800 text-white rounded-lg font-mono font-bold tracking-widest">
-                                        {{ $partit->resultat }}
-                                    </span>
-                                @else
-                                    <span class="text-gray-400 font-bold">VS</span>
-                                @endif
-                            </td>
+            <form action="{{ route('partits.store') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-bold text-gray-700">Equip Local</label>
+                        <select name="local_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($equips as $equip)
+                                <option value="{{ $equip->id }}">{{ $equip->nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-left font-bold text-gray-800">
-                                {{ $partit->visitant->nom }}
-                            </td>
+                    <div>
+                        <label class="block font-bold text-gray-700">Equip Visitant</label>
+                        <select name="visitant_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($equips as $equip)
+                                <option value="{{ $equip->id }}">{{ $equip->nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <a href="{{ route('partits.show', $partit->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">👁️</a>
-                                
-                                {{-- Admin o Árbitro pueden editar --}}
-                                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'arbitre')
-                                    <a href="{{ route('partits.edit', $partit->id) }}" class="text-yellow-600 hover:text-yellow-900 mr-3">✏️</a>
-                                @endif
+                    <div>
+                        <label class="block font-bold text-gray-700">Data i Hora</label>
+                        <input type="datetime-local" name="data" class="w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-bold text-gray-700">Resultat (Opcional)</label>
+                        <input type="text" name="resultat" placeholder="Ex: 0-0" class="w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                </div>
 
-                                @if(auth()->user()->role === 'admin')
-                                    <form action="{{ route('partits.destroy', $partit->id) }}" method="POST" class="inline" onsubmit="return confirm('Cancel·lar el partit?');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">🗑️</button>
-                                    </form>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">No hi ha partits programats.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="p-4 border-t border-gray-200">
-                {{ $partits->links() }}
-            </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Guardar Partit</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
