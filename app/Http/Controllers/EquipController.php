@@ -5,28 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Equip;
 use App\Models\Estadi;
 use Illuminate\Http\Request;
+// 1. IMPORTANTE: Necesitamos importar el Gate para llamar al "portero"
+use Illuminate\Support\Facades\Gate;
 
 class EquipController extends Controller
 {
     // Muestra la lista de equipos
     public function index()
     {
-        // CAMBIO CLAVE: Usamos paginate(10) en vez de all()
-        // También cargamos el 'estadi' para optimizar la consulta (Eager Loading)
         $equips = Equip::with('estadi')->paginate(10);
-        
         return view('equips.index', compact('equips'));
     }
 
     // Muestra el formulario para crear un nuevo equipo
     public function create()
     {
-        // Pasamos los estadios para el desplegable
         $estadis = Estadi::all();
         return view('equips.create', compact('estadis'));
     }
 
-    // Guarda el nuevo equipo en la base de datos
+    // Guarda el nuevo equipo
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,7 +39,7 @@ class EquipController extends Controller
         return redirect()->route('equips.index')->with('success', 'Equip creat correctament.');
     }
 
-    // Muestra los detalles de un equipo
+    // Muestra los detalles
     public function show($id)
     {
         $equip = Equip::with(['estadi', 'jugadores'])->findOrFail($id);
@@ -53,8 +51,9 @@ class EquipController extends Controller
     {
         $equip = Equip::findOrFail($id);
         
-        // POLICY: Solo el Admin o el Manager pueden entrar aquí
-        // (Esto ya lo protege el middleware, pero no está de más)
+        // 2. SEGURIDAD: Aquí activamos la Policy
+        // Si no eres Admin o el Manager de ESTE equipo, te echa fuera (403)
+        Gate::authorize('update', $equip);
         
         $estadis = Estadi::all();
         return view('equips.edit', compact('equip', 'estadis'));
@@ -64,6 +63,9 @@ class EquipController extends Controller
     public function update(Request $request, $id)
     {
         $equip = Equip::findOrFail($id);
+
+        // 3. SEGURIDAD: Aquí también, por si intentan enviar el formulario a la fuerza
+        Gate::authorize('update', $equip);
 
         $validated = $request->validate([
             'nom' => 'required|string|max:255',

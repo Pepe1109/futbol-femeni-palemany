@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Equip;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class EquipPolicy
 {
@@ -37,11 +38,20 @@ class EquipPolicy
      * Determine whether the user can update the model.
      */
     public function update(User $user, Equip $equip): bool
-    {
-        // Permet si és admin O si és manager assignat a aquest equip
-        return $user->role === 'admin' || 
-               ($user->role === 'manager' && $user->team_id === $equip->id);
+{
+    // Si es ADMIN, permiso total.
+    if ($user->role === 'admin') {
+        return true;
     }
+
+    // Si es MANAGER, solo si su team_id coincide con el id del equipo
+    if ($user->role === 'manager') {
+        return $user->team_id === $equip->id;
+    }
+
+    // Si no es nada de eso, prohibido.
+    return false;
+}
 
     /**
      * Determine whether the user can delete the model.
