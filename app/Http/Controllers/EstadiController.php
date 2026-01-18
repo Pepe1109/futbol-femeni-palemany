@@ -2,23 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\EstadiService;
-use App\Http\Requests\StoreEstadiRequest;
-use App\Http\Requests\UpdateEstadiRequest;
-use App\Models\Equip;
+use App\Models\Estadi;
+use Illuminate\Http\Request;
 
 class EstadiController extends Controller
 {
-    protected $service;
-
-    public function __construct(EstadiService $service)
-    {
-        $this->service = $service;
-    }
-
     public function index()
     {
-        $estadis = $this->service->listAll();
+        // Paginamos de 10 en 10
+        $estadis = Estadi::paginate(10);
         return view('estadis.index', compact('estadis'));
     }
 
@@ -27,35 +19,57 @@ class EstadiController extends Controller
         return view('estadis.create');
     }
 
-    public function store(StoreEstadiRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $this->service->store($data);
-        return redirect()->route('estadis.index')->with('success', 'Estadi creat.');
-    }
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255|unique:estadis',
+            'ciutat' => 'required|string|max:255',
+            'capacitat' => 'required|integer|min:100',
+        ]);
 
-    public function edit($id)
-    {
-        $estadi = $this->service->find($id);
-        return view('estadis.edit', compact('estadi'));
-    }
+        Estadi::create($validated);
 
-    public function update(UpdateEstadiRequest $request, $id)
-    {
-        $data = $request->validated();
-        $this->service->update($id, $data);
-        return redirect()->route('estadis.index')->with('success', 'Estadi actualitzat.');
-    }
-
-    public function destroy($id)
-    {
-        $this->service->delete($id);
-        return redirect()->route('estadis.index')->with('success', 'Estadi eliminat.');
+        return redirect()->route('estadis.index')->with('success', 'Estadi inaugurat correctament!');
     }
 
     public function show($id)
     {
-        $estadi = $this->service->find($id);
+        // Cargamos los equipos que juegan aquí para mostrarlos en la ficha
+        $estadi = Estadi::with('equips')->findOrFail($id);
         return view('estadis.show', compact('estadi'));
+    }
+
+    public function edit($id)
+    {
+        $estadi = Estadi::findOrFail($id);
+        return view('estadis.edit', compact('estadi'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $estadi = Estadi::findOrFail($id);
+
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255|unique:estadis,nom,' . $estadi->id,
+            'ciutat' => 'required|string|max:255',
+            'capacitat' => 'required|integer|min:100',
+        ]);
+
+        $estadi->update($validated);
+
+        return redirect()->route('estadis.index')->with('success', 'Estadi reformat correctament.');
+    }
+
+    public function destroy($id)
+    {
+        $estadi = Estadi::findOrFail($id);
+        
+        // Opcional: Impedir borrar si hay equipos asignados
+        if($estadi->equips()->count() > 0) {
+            return back()->with('error', 'No pots enderrocar un estadi que té equips assignats!');
+        }
+
+        $estadi->delete();
+        return redirect()->route('estadis.index')->with('success', 'Estadi enderrocat.');
     }
 }

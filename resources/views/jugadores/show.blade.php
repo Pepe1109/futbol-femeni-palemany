@@ -1,29 +1,30 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h1>Jugadora: {{ $jugadora->nom }}</h1>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-8">
+            <div class="flex items-center space-x-6">
+                <div class="h-32 w-32 bg-gray-200 rounded-full flex items-center justify-center text-4xl font-bold text-gray-500">
+                    {{ $jugadora->dorsal ?? '#' }}
+                </div>
+                
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">{{ $jugadora->nom }} {{ $jugadora->cognoms }}</h2>
+                    <p class="text-xl text-pink-600 font-semibold">{{ $jugadora->posicio }} - {{ $jugadora->equip->nom }}</p>
+                    
+                    <div class="mt-4 grid grid-cols-2 gap-4 text-gray-600">
+                        <p>🎂 <strong>Naixement:</strong> {{ $jugadora->data_naixement ?? 'Desconeguda' }}</p>
+                        <p>👕 <strong>Dorsal:</strong> {{ $jugadora->dorsal }}</p>
+                        <p>🏟️ <strong>Estadi:</strong> {{ $jugadora->equip->estadi->nom ?? 'Sense estadi' }}</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="card mt-3">
-        <div class="card-body">
-            <p><strong>Nom:</strong> {{ $jugadora->nom }}</p>
-            <p><strong>Posició:</strong> {{ $jugadora->posicio }}</p>
-            <p><strong>Dorsal:</strong> {{ $jugadora->dorsal }}</p>
-            <p><strong>Edat:</strong> {{ $jugadora->edat }}</p>
-
-            <p><strong>Equip:</strong>
-                <a href="{{ route('equips.show', $jugadora->equip->id) }}">
-                    {{ $jugadora->equip->nom }}
-                </a>
-            </p>
-
-            @if ($jugadora->foto)
-                <p><strong>Foto:</strong></p>
-                <img src="{{ asset('storage/' . $jugadora->foto) }}" width="250">
-            @endif
+            <div class="mt-8">
+                <a href="{{ route('jugadores.index') }}" class="text-gray-600 hover:text-gray-900 font-bold">&larr; Tornar al llistat</a>
+            </div>
         </div>
     </div>
-
-    <a href="{{ route('jugadores.index') }}" class="btn btn-secondary mt-3">Tornar</a>
 </div>
 @endsection

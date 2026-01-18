@@ -2,64 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Partit;
 use App\Models\Equip;
+use Illuminate\Http\Request;
 
 class PartitController extends Controller
 {
-    // Mostrar todos los partidos
+    // Llistat de pròxims partits (o tots)
     public function index()
     {
-        $partits = Partit::with(['local', 'visitant'])->get();
+        // Ordenamos por fecha (los más nuevos primero) y paginamos
+        $partits = Partit::with(['local', 'visitant'])
+                    ->orderBy('data', 'asc')
+                    ->paginate(10);
+                    
         return view('partits.index', compact('partits'));
     }
 
-    // Mostrar un partido
+    // Llistat de partits ja jugats (HISTÒRIC)
+    public function historic()
+    {
+        // Filtramos solo los que tienen resultado o fecha pasada
+        $partits = Partit::with(['local', 'visitant'])
+                    ->whereNotNull('resultat')
+                    ->orWhere('data', '<', now())
+                    ->orderBy('data', 'desc')
+                    ->paginate(10);
+                    
+        return view('partits.index', compact('partits')); // Reutilizamos la vista index
+    }
+
+    public function create()
+    {
+        $equips = Equip::all();
+        return view('partits.create', compact('equips'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'local_id' => 'required|exists:equips,id',
+            // Validamos que el visitante sea diferente al local
+            'visitant_id' => 'required|exists:equips,id|different:local_id', 
+            'data' => 'required|date',
+            'resultat' => 'nullable|string|max:20', // Ej: "2-1"
+        ]);
+
+        Partit::create($validated);
+
+        return redirect()->route('partits.index')->with('success', 'Partit programat correctament!');
+    }
+
     public function show($id)
     {
-        $partit = Partit::with(['local', 'visitant'])->find($id);
-
-        if (!$partit) {
-            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
-        }
-
+        $partit = Partit::with(['local', 'visitant'])->findOrFail($id);
         return view('partits.show', compact('partit'));
     }
 
-    // Formulario para editar
     public function edit($id)
     {
-        $partit = Partit::find($id);
-
-        if (!$partit) {
-            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
-        }
-
+        $partit = Partit::findOrFail($id);
         $equips = Equip::all();
-
         return view('partits.edit', compact('partit', 'equips'));
     }
 
-    // Guardar cambios
     public function update(Request $request, $id)
     {
-        $partit = Partit::find($id);
+        $partit = Partit::findOrFail($id);
 
-        if (!$partit) {
-            return redirect()->route('partits.index')->with('error', 'Partit no trobat.');
-        }
-
-        $request->validate([
+        $validated = $request->validate([
             'local_id' => 'required|exists:equips,id',
             'visitant_id' => 'required|exists:equips,id|different:local_id',
             'data' => 'required|date',
             'resultat' => 'nullable|string|max:20',
         ]);
 
-        $partit->update($request->all());
+        $partit->update($validated);
 
-        return redirect()->route('partits.show', $partit->id)
-                         ->with('success', 'Partit actualitzat correctament.');
+        // Si vienes de editar, te devolvemos a la lista
+        return redirect()->route('partits.index')->with('success', 'Marcador/Dades actualitzades.');
+    }
+
+    public function destroy($id)
+    {
+        $partit = Partit::findOrFail($id);
+        $partit->delete();
+        return redirect()->route('partits.index')->with('success', 'Partit cancel·lat.');
     }
 }

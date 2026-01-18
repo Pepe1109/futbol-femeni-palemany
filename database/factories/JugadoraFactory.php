@@ -16,9 +16,8 @@ class JugadoraFactory extends Factory
 
         return [
             'equip_id' => Equip::factory(),
-            // Usamos firstName para el nombre y lastName para el apellido
-            'nom' => $this->faker->firstName, 
-            'cognoms' => $this->faker->lastName, // <--- AQUESTA LÍNIA FALTAVA
+            'nom' => $this->faker->firstName,
+            'cognoms' => $this->faker->lastName,
             'data_naixement' => $this->faker->dateTimeBetween('-35 years', '-18 years')->format('Y-m-d'),
             'dorsal' => $this->faker->numberBetween(1, 99),
             'posicio' => $this->faker->randomElement($posicions),

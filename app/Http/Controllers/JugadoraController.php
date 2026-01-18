@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Jugadora;
 use App\Models\Equip;
+use Illuminate\Http\Request;
 
 class JugadoraController extends Controller
 {
     public function index()
     {
+        // Usamos paginate(10) para que no explote la vista
         $jugadores = Jugadora::with('equip')->paginate(10);
         return view('jugadores.index', compact('jugadores'));
     }
@@ -25,16 +26,16 @@ class JugadoraController extends Controller
     {
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
-            'cognoms' => 'required|string|max:255', // AFEGIT
+            'cognoms' => 'required|string|max:255',
             'equip_id' => 'required|exists:equips,id',
             'posicio' => 'required|string',
-            'dorsal' => 'nullable|integer',
+            'dorsal' => 'nullable|integer|min:1|max:99',
             'data_naixement' => 'nullable|date',
         ]);
 
         Jugadora::create($validated);
 
-        return redirect()->route('jugadores.index')->with('success', 'Jugadora creada correctament.');
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora fitxada correctament!');
     }
 
     public function show($id)
@@ -58,22 +59,22 @@ class JugadoraController extends Controller
 
         $validated = $request->validate([
             'nom' => 'required|string|max:255',
-            'cognoms' => 'required|string|max:255', // AFEGIT
+            'cognoms' => 'required|string|max:255',
             'equip_id' => 'required|exists:equips,id',
             'posicio' => 'required|string',
-            'dorsal' => 'nullable|integer',
+            'dorsal' => 'nullable|integer|min:1|max:99',
             'data_naixement' => 'nullable|date',
         ]);
 
         $jugadora->update($validated);
 
-        return redirect()->route('jugadores.index')->with('success', 'Jugadora actualitzada correctament.');
+        return redirect()->route('jugadores.index')->with('success', 'Dades de la jugadora actualitzades.');
     }
 
     public function destroy($id)
     {
         $jugadora = Jugadora::findOrFail($id);
         $jugadora->delete();
-        return redirect()->route('jugadores.index')->with('success', 'Jugadora eliminada correctament.');
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora retirada del sistema.');
     }
 }

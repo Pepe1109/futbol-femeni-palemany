@@ -9,10 +9,11 @@ class Estadi extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom','ciutat','capacitat','equip_principal'];
+    protected $fillable = ['nom', 'ciutat', 'capacitat'];
 
-    public function partits()
+    // Relación: Un estadio tiene muchos equipos (o uno)
+    public function equips()
     {
-        return $this->hasMany(Partit::class);
+        return $this->hasMany(Equip::class);
     }
 }

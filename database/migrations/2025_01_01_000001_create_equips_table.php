@@ -15,10 +15,15 @@ return new class extends Migration {
             $table->string('lliga')->nullable();
             $table->integer('titols')->default(0);
             $table->string('escut')->nullable();
+            
+            // --- ESTA LÍNEA FALTABA Y ERA EL ERROR AL GUARDAR ---
+            $table->foreignId('estadi_id')->nullable(); 
+            // ----------------------------------------------------
+
             $table->timestamps();
         });
 
-        // 2. ARA que equips existeix, connectem la taula users amb equips
+        // 2. Relació amb users
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('team_id')
                   ->references('id')->on('equips')
@@ -28,11 +33,9 @@ return new class extends Migration {
 
     public function down()
     {
-        // Primer trenquem la relació
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['team_id']);
         });
-        // Després esborrem la taula
         Schema::dropIfExists('equips');
     }
 };

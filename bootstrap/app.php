@@ -11,7 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Registrem l'alias del middleware per als rols
+        // AQUÍ ACTIVAMOS EL MIDDLEWARE DE LOS ROLES
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);

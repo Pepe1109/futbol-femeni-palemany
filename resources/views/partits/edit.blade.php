@@ -1,45 +1,53 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>Editar Partit</h1>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">✏️ Actualitzar Partit/Resultat</h2>
 
-@if(session('error'))
-    <div style="color:red">{{ session('error') }}</div>
-@endif
+            <form action="{{ route('partits.update', $partit->id) }}" method="POST">
+                @csrf @method('PUT')
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-bold text-gray-700">Equip Local</label>
+                        <select name="local_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($equips as $equip)
+                                <option value="{{ $equip->id }}" {{ $partit->local_id == $equip->id ? 'selected' : '' }}>
+                                    {{ $equip->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<form action="{{ route('partits.update', $partit->id) }}" method="POST">
-    @csrf
-    @method('PUT')
+                    <div>
+                        <label class="block font-bold text-gray-700">Equip Visitant</label>
+                        <select name="visitant_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($equips as $equip)
+                                <option value="{{ $equip->id }}" {{ $partit->visitant_id == $equip->id ? 'selected' : '' }}>
+                                    {{ $equip->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-    <label>Equip Local:</label>
-    <select name="local_id" required>
-        @foreach($equips as $equip)
-            <option value="{{ $equip->id }}" {{ $equip->id == $partit->local_id ? 'selected' : '' }}>
-                {{ $equip->nom }}
-            </option>
-        @endforeach
-    </select>
-    <br><br>
+                    <div>
+                        <label class="block font-bold text-gray-700">Data</label>
+                        <input type="datetime-local" name="data" value="{{ \Carbon\Carbon::parse($partit->data)->format('Y-m-d\TH:i') }}" class="w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
 
-    <label>Equip Visitant:</label>
-    <select name="visitant_id" required>
-        @foreach($equips as $equip)
-            <option value="{{ $equip->id }}" {{ $equip->id == $partit->visitant_id ? 'selected' : '' }}>
-                {{ $equip->nom }}
-            </option>
-        @endforeach
-    </select>
-    <br><br>
+                    <div>
+                        <label class="block font-bold text-gray-700 text-blue-600">Marcador Final</label>
+                        <input type="text" name="resultat" value="{{ $partit->resultat }}" placeholder="Ex: 2-1" class="w-full border-blue-300 rounded-md shadow-sm ring ring-blue-100">
+                    </div>
+                </div>
 
-    <label>Data:</label>
-    <input type="date" name="data" value="{{ $partit->data->format('Y-m-d') }}" required>
-    <br><br>
-
-    <label>Resultat:</label>
-    <input type="text" name="resultat" value="{{ $partit->resultat }}">
-    <br><br>
-
-    <button type="submit">Guardar</button>
-    <a href="{{ route('partits.show', $partit->id) }}">Tornar</a>
-</form>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Actualizar Marcador</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

@@ -1,64 +1,59 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">Nova Jugadora</h2>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">📝 Fitxar Nova Jugadora</h2>
 
-        <form action="{{ route('jugadores.store') }}" method="POST">
-            @csrf
+            @if ($errors->any())
+                <div class="mb-4 bg-red-100 text-red-700 p-4 rounded">
+                    <ul>@foreach ($errors->all() as $error) <li>• {{ $error }}</li> @endforeach</ul>
+                </div>
+            @endif
 
-            <div class="mb-4">
-                <label for="nom" class="block text-sm font-medium text-gray-700">Nom</label>
-                <input type="text" name="nom" id="nom" value="{{ old('nom') }}" required 
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                @error('nom') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
+            <form action="{{ route('jugadores.store') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-bold text-gray-700">Nom</label>
+                        <input type="text" name="nom" class="w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Cognoms</label>
+                        <input type="text" name="cognoms" class="w-full border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Equip</label>
+                        <select name="equip_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($equips as $equip)
+                                <option value="{{ $equip->id }}">{{ $equip->nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Posició</label>
+                        <select name="posicio" class="w-full border-gray-300 rounded-md shadow-sm">
+                            @foreach($posicions as $pos)
+                                <option value="{{ $pos }}">{{ $pos }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Dorsal</label>
+                        <input type="number" name="dorsal" class="w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700">Data Naixement</label>
+                        <input type="date" name="data_naixement" class="w-full border-gray-300 rounded-md shadow-sm">
+                    </div>
+                </div>
 
-            <div class="mb-4">
-                <label for="cognoms" class="block text-sm font-medium text-gray-700">Cognoms</label>
-                <input type="text" name="cognoms" id="cognoms" value="{{ old('cognoms') }}" required 
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                @error('cognoms') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="mb-4">
-                <label for="equip_id" class="block text-sm font-medium text-gray-700">Equip</label>
-                <select name="equip_id" id="equip_id" required 
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">-- Selecciona Equip --</option>
-                    @foreach($equips as $equip)
-                        <option value="{{ $equip->id }}" {{ old('equip_id') == $equip->id ? 'selected' : '' }}>
-                            {{ $equip->nom }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('equip_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="mb-4">
-                <label for="posicio" class="block text-sm font-medium text-gray-700">Posició</label>
-                <select name="posicio" id="posicio" required
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">-- Selecciona Posició --</option>
-                    @foreach ($posicions as $pos)
-                        <option value="{{ $pos }}" {{ old('posicio') === $pos ? 'selected' : '' }}>
-                            {{ $pos }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('posicio') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-            
-            <div class="mb-4">
-                <label for="dorsal" class="block text-sm font-medium text-gray-700">Dorsal</label>
-                <input type="number" name="dorsal" id="dorsal" value="{{ old('dorsal') }}" 
-                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                @error('dorsal') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
-                Guardar Jugadora
-            </button>
-        </form>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700">Guardar Jugadora</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 @endsection

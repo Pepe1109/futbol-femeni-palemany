@@ -7,18 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Equip extends Model
 {
-    /** @use HasFactory<\Database\Factories\EquipFactory> */
     use HasFactory;
 
-    // Afegim 'escut' a la llista de camps permesos
-    protected $fillable = ['nom', 'estadi_id', 'titols', 'escut'];
+    // HE AÑADIDO 'ciutat' QUE TAMBIÉN TE IBA A DAR ERROR
+    protected $fillable = ['nom', 'ciutat', 'estadi_id', 'titols', 'escut'];
 
     public function estadi()
     {
         return $this->belongsTo(Estadi::class);
     }
 
-    // Nova relació: Un equip té un manager
+    // --- ESTA ES LA FUNCIÓN QUE FALTABA PARA VER LAS JUGADORAS ---
+    public function jugadores()
+    {
+        return $this->hasMany(Jugadora::class);
+    }
+    // -------------------------------------------------------------
+
     public function manager()
     {
         return $this->hasOne(User::class, 'team_id');
